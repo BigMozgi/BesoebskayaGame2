@@ -1,15 +1,15 @@
 // Настройки игры
-// Проверяем, что игра открыта в Telegram
 if (window.Telegram?.WebApp?.platform) {
   Telegram.WebApp.expand(); // Раскрываем на весь экран
-  Telegram.WebApp.MainButton.setText("🔄 Обновить").show(); // Добавляем кнопку
+  Telegram.WebApp.MainButton.setText("🔄 Обновить").show(); // Кнопка
 }
+
 const demonImages = {
-  happy: "assets/happy.png",    // Довольный
-  hungry: "assets/hungry.png",  // Голодный
-  angry: "assets/angry.png",    // Злой
-  dead: "assets/dead.png",      // Мёртвый
-  default: "assets/happy.png"   // Нейтральный
+  happy: "assets/happy.png",
+  hungry: "assets/hungry.png",
+  angry: "assets/angry.png",
+  dead: "assets/dead.png",
+  default: "assets/happy.png"
 };
 
 let demon = {
@@ -17,63 +17,83 @@ let demon = {
   mood: 50
 };
 
-// Функция обновления состояния - ИЗМЕНИТЬ ЭТУ ФУНКЦИЮ ПОЛНОСТЬЮ
+let isDead = false;
+
 function updateStats() {
   const demonImg = document.getElementById("demon");
-  
-  // Сначала проверяем смерть (это важно!)
+  if (!demonImg) {
+    console.error("Элемент с id='demon' не найден");
+    return;
+  }
+
+  // Проверка смерти
   if (demon.hunger <= 0 || demon.mood <= 0) {
-    demonImg.src = demonImages.dead; // Сначала меняем картинку
+    isDead = true;
+    demon.hunger = 0;
+    demon.mood = 0;
+    demonImg.src = demonImages.dead;
     document.getElementById("hunger").textContent = 0;
     document.getElementById("mood").textContent = 0;
-    
-    setTimeout(() => { // Даём 50мс на отрисовку картинки
+
+    const playDeathSound = () => {
+      const audio = new Audio("assets/dead.ogg");
+      audio.play().catch(e => console.log("Ошибка звука:", e));
+    };
+
+    if (!window.Telegram?.WebApp?.platform) {
+      document.body.addEventListener("click", playDeathSound, { once: true });
+    } else {
+      playDeathSound();
+    }
+
+    setTimeout(() => {
       alert("Бес умер! Начни заново.");
       resetGame();
     }, 50);
-    return; // Выходим из функции
+    return;
   }
-  
-  // Обновляем цифры
-  document.getElementById("hunger").textContent = demon.hunger;
-  document.getElementById("mood").textContent = demon.mood;
-  
-  // Меняем картинку для живого беса
+
+  // Состояние демона
   if (demon.hunger < 20) {
     demonImg.src = demonImages.hungry;
-  } 
-  else if (demon.mood < 30) {
+  } else if (demon.mood < 30) {
     demonImg.src = demonImages.angry;
-  } 
-  else if (demon.mood > 70) {
+  } else if (demon.mood > 70) {
     demonImg.src = demonImages.happy;
-  } 
-  else {
+  } else {
     demonImg.src = demonImages.default;
   }
+
+  // Обновление текста
+  document.getElementById("hunger").textContent = demon.hunger;
+  document.getElementById("mood").textContent = demon.mood;
 }
 
-// Остальные функции БЕЗ ИЗМЕНЕНИЙ
+// Действия
 function feed() {
+  if (isDead) return;
   demon.hunger = Math.min(demon.hunger + 20, 100);
   updateStats();
 }
 
 function play() {
+  if (isDead) return;
   demon.mood = Math.min(demon.mood + 15, 100);
   demon.hunger = Math.max(demon.hunger - 5, 0);
   updateStats();
 }
 
 function clean() {
+  if (isDead) return;
   demon.mood = Math.min(demon.mood + 10, 100);
   updateStats();
 }
 
-// Авто-ухудшение параметров
+// Авто-ухудшение
 setInterval(() => {
-  demon.hunger -= 10;
-  demon.mood -= 7;
+  if (isDead) return;
+  demon.hunger = Math.max(demon.hunger - 10, 0);
+  demon.mood = Math.max(demon.mood - 7, 0);
   updateStats();
 }, 1000);
 
@@ -81,8 +101,22 @@ setInterval(() => {
 function resetGame() {
   demon.hunger = 50;
   demon.mood = 50;
+  isDead = false;
   updateStats();
 }
 
-// Старт игры
+// Фоновая музыка
+const bgMusic = new Audio("assets/fonofaya.ogg");
+bgMusic.loop = true;
+bgMusic.volume = 0.3;
+
+if (window.Telegram?.WebApp?.platform) {
+  bgMusic.play().catch(e => console.log("Не удалось запустить музыку:", e));
+}
+
+document.getElementById("music-toggle")?.addEventListener("click", () => {
+  bgMusic.paused ? bgMusic.play() : bgMusic.pause();
+});
+
+// Старт
 updateStats();
