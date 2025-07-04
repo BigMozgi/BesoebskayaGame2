@@ -117,6 +117,12 @@ if (window.Telegram?.WebApp?.platform) {
 document.getElementById("music-toggle")?.addEventListener("click", () => {
   bgMusic.paused ? bgMusic.play() : bgMusic.pause();
 });
-
+// Гарантированный запуск после клика
+if (bgMusic.paused) {
+  document.body.addEventListener("click", function startMusic() {
+    bgMusic.play().catch(e => console.log("Музыка не воспроизвелась:", e));
+    document.body.removeEventListener("click", startMusic);
+  });
+}
 // Старт
 updateStats();
