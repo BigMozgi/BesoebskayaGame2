@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Вырасти беса!</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="game">
+    <h1>Вырасти беса! 👹</h1>
+    
+    <!-- Контейнер для картинки беса -->
+    <img id="demon" src="" alt="Бес" class="demon-image">
+    
+    <div class="stats">
+      <div>Голод: <span id="hunger">50</span>/100</div>
+      <div>Настроение: <span id="mood">50</span>/100</div>
+    </div>
+    
+    <div class="buttons">
+      <button onclick="feed()">🍗 Покормить</button>
+      <button onclick="play()">🎮 Поиграть</button>
+      <button onclick="clean()">🧹 Убрать</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
