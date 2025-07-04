@@ -1,4 +1,9 @@
 // Настройки игры
+// Проверяем, что игра открыта в Telegram
+if (window.Telegram?.WebApp?.platform) {
+  Telegram.WebApp.expand(); // Раскрываем на весь экран
+  Telegram.WebApp.MainButton.setText("🔄 Обновить").show(); // Добавляем кнопку
+}
 const demonImages = {
   happy: "assets/happy.png",    // Довольный
   hungry: "assets/hungry.png",  // Голодный
